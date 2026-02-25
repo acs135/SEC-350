@@ -30,10 +30,16 @@ set firewall ipv4 name LAN-to-WAN default-log
 set firewall ipv4 name LAN-to-WAN rule 1 action 'accept'
 set firewall ipv4 name WAN-to-DMZ default-action 'drop'
 set firewall ipv4 name WAN-to-DMZ default-log
+set firewall ipv4 name WAN-to-DMZ rule 1 action 'accept'
+set firewall ipv4 name WAN-to-DMZ rule 1 state 'established'
 set firewall ipv4 name WAN-to-DMZ rule 10 action 'accept'
 set firewall ipv4 name WAN-to-DMZ rule 10 destination address '172.16.50.3'
 set firewall ipv4 name WAN-to-DMZ rule 10 destination port '80'
 set firewall ipv4 name WAN-to-DMZ rule 10 protocol 'tcp'
+set firewall ipv4 name WAN-to-DMZ rule 20 action 'accept'
+set firewall ipv4 name WAN-to-DMZ rule 20 destination address '172.16.50.4'
+set firewall ipv4 name WAN-to-DMZ rule 20 destination port '22'
+set firewall ipv4 name WAN-to-DMZ rule 20 protocol 'tcp'
 set firewall ipv4 name WAN-to-LAN default-action 'drop'
 set firewall ipv4 name WAN-to-LAN default-log
 set firewall ipv4 name WAN-to-LAN rule 1 action 'accept'
@@ -61,6 +67,16 @@ set interfaces ethernet eth2 address '172.16.50.2/29'
 set interfaces ethernet eth2 description 'DMZ'
 set interfaces ethernet eth2 hw-id 'bc:24:11:a8:3b:90'
 set interfaces loopback lo
+set nat destination rule 10 destination port '80'
+set nat destination rule 10 inbound-interface name 'eth0'
+set nat destination rule 10 protocol 'tcp'
+set nat destination rule 10 translation address '172.16.50.3'
+set nat destination rule 10 translation port '80'
+set nat destination rule 20 destination port '22'
+set nat destination rule 20 inbound-interface name 'eth0'
+set nat destination rule 20 protocol 'tcp'
+set nat destination rule 20 translation address '172.16.50.4'
+set nat destination rule 20 translation port '22'
 set nat source rule 10 description 'NAT FROM DMZ to WAN'
 set nat source rule 10 outbound-interface name 'eth0'
 set nat source rule 10 source address '172.16.50.0/29'
@@ -93,6 +109,7 @@ set service ntp server time1.vyos.net
 set service ntp server time2.vyos.net
 set service ntp server time3.vyos.net
 set service ssh access-control allow
+set service ssh listen-address '172.16.150.2'
 set system config-management commit-revisions '100'
 set system console device ttyS0 speed '115200'
 set system host-name 'fw01-aidan.stewart'
