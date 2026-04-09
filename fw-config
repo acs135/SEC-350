@@ -1,5 +1,5 @@
 set firewall ipv4 name DMZ-to-LAN default-action 'drop'
-set firewall ipv4 name DMZ-to-LAN default-log
+set firewall ipv4 name DMZ-to-LAN enable-default-log
 set firewall ipv4 name DMZ-to-LAN rule 1 action 'accept'
 set firewall ipv4 name DMZ-to-LAN rule 1 state 'established'
 set firewall ipv4 name DMZ-to-LAN rule 10 action 'accept'
@@ -7,12 +7,23 @@ set firewall ipv4 name DMZ-to-LAN rule 10 description 'Wazuh agent communication
 set firewall ipv4 name DMZ-to-LAN rule 10 destination address '172.16.200.10'
 set firewall ipv4 name DMZ-to-LAN rule 10 destination port '1514,1515'
 set firewall ipv4 name DMZ-to-LAN rule 10 protocol 'tcp'
+set firewall ipv4 name DMZ-to-LAN rule 20 action 'accept'
+set firewall ipv4 name DMZ-to-LAN rule 20 destination port '3389'
+set firewall ipv4 name DMZ-to-LAN rule 20 protocol 'tcp'
+set firewall ipv4 name DMZ-to-LAN rule 20 source address '172.16.50.4'
+set firewall ipv4 name DMZ-to-LAN rule 30 action 'accept'
+set firewall ipv4 name DMZ-to-LAN rule 30 destination port '3389'
+set firewall ipv4 name DMZ-to-LAN rule 30 protocol 'udp'
+set firewall ipv4 name DMZ-to-LAN rule 30 source address '172.16.50.4'
 set firewall ipv4 name DMZ-to-WAN default-action 'drop'
-set firewall ipv4 name DMZ-to-WAN default-log
+set firewall ipv4 name DMZ-to-WAN enable-default-log
 set firewall ipv4 name DMZ-to-WAN rule 1 action 'accept'
 set firewall ipv4 name DMZ-to-WAN rule 1 state 'established'
+set firewall ipv4 name DMZ-to-WAN rule 10 action 'accept'
+set firewall ipv4 name DMZ-to-WAN rule 10 destination port '123'
+set firewall ipv4 name DMZ-to-WAN rule 10 protocol 'udp'
 set firewall ipv4 name LAN-to-DMZ default-action 'drop'
-set firewall ipv4 name LAN-to-DMZ default-log
+set firewall ipv4 name LAN-to-DMZ enable-default-log
 set firewall ipv4 name LAN-to-DMZ rule 1 action 'accept'
 set firewall ipv4 name LAN-to-DMZ rule 1 state 'established'
 set firewall ipv4 name LAN-to-DMZ rule 10 action 'accept'
@@ -26,10 +37,10 @@ set firewall ipv4 name LAN-to-DMZ rule 20 destination port '22'
 set firewall ipv4 name LAN-to-DMZ rule 20 protocol 'tcp'
 set firewall ipv4 name LAN-to-DMZ rule 20 source address '172.16.150.10'
 set firewall ipv4 name LAN-to-WAN default-action 'drop'
-set firewall ipv4 name LAN-to-WAN default-log
+set firewall ipv4 name LAN-to-WAN enable-default-log
 set firewall ipv4 name LAN-to-WAN rule 1 action 'accept'
 set firewall ipv4 name WAN-to-DMZ default-action 'drop'
-set firewall ipv4 name WAN-to-DMZ default-log
+set firewall ipv4 name WAN-to-DMZ enable-default-log
 set firewall ipv4 name WAN-to-DMZ rule 1 action 'accept'
 set firewall ipv4 name WAN-to-DMZ rule 1 state 'established'
 set firewall ipv4 name WAN-to-DMZ rule 10 action 'accept'
@@ -41,18 +52,20 @@ set firewall ipv4 name WAN-to-DMZ rule 20 destination address '172.16.50.4'
 set firewall ipv4 name WAN-to-DMZ rule 20 destination port '22'
 set firewall ipv4 name WAN-to-DMZ rule 20 protocol 'tcp'
 set firewall ipv4 name WAN-to-LAN default-action 'drop'
-set firewall ipv4 name WAN-to-LAN default-log
+set firewall ipv4 name WAN-to-LAN enable-default-log
 set firewall ipv4 name WAN-to-LAN rule 1 action 'accept'
 set firewall ipv4 name WAN-to-LAN rule 1 state 'established'
 set firewall zone DMZ from LAN firewall name 'LAN-to-DMZ'
 set firewall zone DMZ from WAN firewall name 'WAN-to-DMZ'
-set firewall zone DMZ member interface 'eth2'
+set firewall zone DMZ interface 'eth2'
 set firewall zone LAN from DMZ firewall name 'DMZ-to-LAN'
 set firewall zone LAN from WAN firewall name 'WAN-to-LAN'
-set firewall zone LAN member interface 'eth1'
+set firewall zone LAN interface 'ETH1'
+set firewall zone LAN interface 'eth1'
 set firewall zone WAN from DMZ firewall name 'DMZ-to-WAN'
 set firewall zone WAN from LAN firewall name 'LAN-to-WAN'
-set firewall zone WAN member interface 'eth0'
+set firewall zone WAN interface 'eth0'
+set interfaces ethernet eth0 address 'dhcp'
 set interfaces ethernet eth0 address '10.0.17.131/24'
 set interfaces ethernet eth0 description 'WAN'
 set interfaces ethernet eth0 hw-id 'bc:24:11:43:9c:7b'
@@ -97,6 +110,8 @@ set service dns forwarding allow-from '172.16.150.0/24'
 set service dns forwarding listen-address '172.16.50.2'
 set service dns forwarding listen-address '172.16.150.2'
 set service dns forwarding system
+set service ntp allow-client address '0.0.0.0/0'
+set service ntp allow-client address '::/0'
 set service ntp allow-client address '127.0.0.0/8'
 set service ntp allow-client address '169.254.0.0/16'
 set service ntp allow-client address '10.0.0.0/8'
@@ -109,17 +124,23 @@ set service ntp server time1.vyos.net
 set service ntp server time2.vyos.net
 set service ntp server time3.vyos.net
 set service ssh access-control allow
+set service ssh listen-address '0.0.0.0'
 set service ssh listen-address '172.16.150.2'
 set system config-management commit-revisions '100'
+set system conntrack modules ftp
+set system conntrack modules h323
+set system conntrack modules nfs
+set system conntrack modules pptp
+set system conntrack modules sip
+set system conntrack modules sqlnet
+set system conntrack modules tftp
 set system console device ttyS0 speed '115200'
-set system host-name 'fw01-aidan.stewart'
-set system login operator-group default command-policy allow '*'
+set system host-name 'edge01-aidan'
 set system login user deployer authentication encrypted-password '$6$rounds=656000$kZGG17SHOn6PYNb7$DE05q2Cul4BAnMqb0KVi6sGEDAkWrl2SOKWYOf3DMSF.bCFTEVEZyWen/6UYMSY7qo6jX51PaA0bWeKotPPRc1'
 set system login user deployer full-name 'deployer'
 set system login user newuser full-name 'deployer'
-set system login user newuswer disable
 set system login user vyos authentication encrypted-password '$6$rounds=656000$IzF6lxRwMhM08fvQ$lpwkxdOxXd5w7vEHboE035eVwwRqAtvd2HY/DV5DBIsRmYL8qhj6TRTPqP38XM6UHG3cAcnTZH9nf4UuZIflB1'
+set system login user vyos authentication plaintext-password ''
 set system name-server '10.0.17.2'
-set system option reboot-on-upgrade-failure '5'
-set system syslog local facility all level 'info'
-set system syslog local facility local7 level 'debug'
+set system syslog global facility all level 'info'
+set system syslog global facility local7 level 'debug'
